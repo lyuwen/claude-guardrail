@@ -177,7 +177,14 @@ def evaluate_action(
         python_match = re.match(r'^(python[0-9.]*)\s+(.+)$', target.strip())
         if python_match:
             script_path = python_match.group(2).split()[0]
-            if is_safe_python_script(script_path):
+
+            # Extract working directory from cd commands in the full command
+            working_dir: str | None = None
+            cd_match = re.search(r'\bcd\s+([^\s;&|]+)', target)
+            if cd_match:
+                working_dir = cd_match.group(1)
+
+            if is_safe_python_script(script_path, working_dir):
                 return {"decision": "allow", "reason": "safe read-only python script"}
 
     # ------------------------------------------------------------------

@@ -1,8 +1,17 @@
 """Analyze Python scripts for read-only safety."""
 
 import ast
+import os
 import re
 from pathlib import Path
+
+# Dangerous system directories to block
+DANGEROUS_DIRECTORIES = {
+    "/bin", "/sbin", "/usr/bin", "/usr/sbin", "/usr/local/bin",
+    "/etc", "/boot", "/sys", "/proc", "/dev",
+    "/lib", "/lib64", "/usr/lib", "/usr/lib64",
+    "/root", "/var/log", "/var/lib", "/var/run",
+}
 
 # Modules that are safe for data processing
 SAFE_MODULES = {
@@ -29,8 +38,34 @@ DANGEROUS_PATTERNS = [
 ]
 
 
-def is_safe_python_script(script_path: str) -> bool:
+def is_safe_directory(directory: str) -> bool:
+    """Check if a directory is safe to navigate into.
+
+    Returns False if directory is a system directory.
+    """
+    try:
+        # Resolve to absolute path
+        abs_path = os.path.abspath(directory)
+
+        # Check if it's a dangerous system directory
+        for dangerous in DANGEROUS_DIRECTORIES:
+            if abs_path == dangerous or abs_path.startswith(dangerous + "/"):
+                return False
+
+        return True
+    except Exception:
+        return False
+
+
+def is_safe_python_script(script_path: str, working_dir: str | None = None) -> bool:
     """Check if a Python script is safe (read-only data processing).
+
+    Parameters
+    ----------
+    script_path : str
+        Path to the Python script (may be relative)
+    working_dir : str, optional
+        Working directory to resolve relative paths (default: current dir)
 
     Returns True if the script only:
     - Imports safe modules
@@ -38,7 +73,16 @@ def is_safe_python_script(script_path: str) -> bool:
     - Does not use subprocess
     """
     try:
-        path = Path(script_path)
+        # Check if working directory is safe
+        if working_dir and not is_safe_directory(working_dir):
+            return False
+
+        # Resolve path relative to working directory
+        if working_dir:
+            path = Path(working_dir) / script_path
+        else:
+            path = Path(script_path)
+
         if not path.exists() or not path.is_file():
             return False
 
