@@ -1,16 +1,25 @@
 {
-  "name": "claude-guardrail-marketplace",
+  "name": "claude-guardrail",
   "owner": {
     "name": "lyuwen",
-    "url": "https://github.com/lyuwen"
+    "email": ""
+  },
+  "metadata": {
+    "description": "Security hook with rule-based and LLM-powered action classification for Claude Code",
+    "version": "0.1.0"
   },
   "plugins": [
     {
       "name": "claude-guardrail",
-      "source": {
-        "type": "git",
-        "url": "https://github.com/lyuwen/claude-guardrail.git"
-      }
+      "description": "Three-layer security model with deny/allow/ask rules, optional LLM classification, and comprehensive skills for configuration and troubleshooting",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/understanding-guardrail",
+        "./skills/configuring-rules",
+        "./skills/troubleshooting",
+        "./skills/layer-2-setup"
+      ]
     }
   ]
 }
