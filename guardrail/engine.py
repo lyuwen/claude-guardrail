@@ -174,18 +174,23 @@ def evaluate_action(
     # ------------------------------------------------------------------
     if rule_category == "bash":
         # Python script execution: check if it's safe read-only
-        python_match = re.match(r'^(python[0-9.]*)\s+(.+)$', target.strip())
-        if python_match:
-            script_path = python_match.group(2).split()[0]
+        # Check each segment for python commands
+        segments = split_bash_command(target)
+        working_dir: str | None = None
 
-            # Extract working directory from cd commands in the full command
-            working_dir: str | None = None
-            cd_match = re.search(r'\bcd\s+([^\s;&|]+)', target)
+        # First pass: extract working directory from cd commands
+        for segment in segments:
+            cd_match = re.match(r'^\s*cd\s+([^\s;&|]+)', segment.strip())
             if cd_match:
                 working_dir = cd_match.group(1)
 
-            if is_safe_python_script(script_path, working_dir):
-                return {"decision": "allow", "reason": "safe read-only python script"}
+        # Second pass: check python commands
+        for segment in segments:
+            python_match = re.match(r'^\s*(python[0-9.]*)\s+(.+)$', segment.strip())
+            if python_match:
+                script_path = python_match.group(2).split()[0]
+                if is_safe_python_script(script_path, working_dir):
+                    return {"decision": "allow", "reason": "safe read-only python script"}
 
     # ------------------------------------------------------------------
     # Step 7: Check ask rules
