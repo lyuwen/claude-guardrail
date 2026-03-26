@@ -21,6 +21,8 @@ from pathlib import Path
 from guardrail.config import load_config
 from guardrail.engine import evaluate_action
 from guardrail.logger import create_pending_marker, resolve_pending_marker, log_decision
+from guardrail.llm import evaluate_with_llm
+from guardrail.sanitizer import sanitize_target
 
 
 # Maps tool names to the key used to extract the target from tool_input.
@@ -142,10 +144,48 @@ def main() -> None:
                     }
                 }))
             else:
-                # "pass" -> no output, but create a pending marker for
-                # Layer 2 tracking so PostToolUse can log the outcome.
-                log_decision(tool_name, target, "pass", reason, config)
-                create_pending_marker(tool_name, target, config)
+                # "pass" -> try Layer 2 LLM classification
+                sanitized = sanitize_target(target, tool_name)
+                context = payload.get("context", "")
+                user_request = payload.get("user_request", "")
+
+                llm_result = evaluate_with_llm(
+                    tool_name, sanitized, context, user_request, config
+                )
+                llm_decision = llm_result.get("decision", "pass")
+                llm_reason = llm_result.get("reason", "")
+
+                if llm_decision == "allow":
+                    log_decision(tool_name, target, "allow", llm_reason, config)
+                    print(json.dumps({
+                        "hookSpecificOutput": {
+                            "hookEventName": "PreToolUse",
+                            "permissionDecision": "allow",
+                            "permissionDecisionReason": llm_reason,
+                        }
+                    }))
+                elif llm_decision == "deny":
+                    log_decision(tool_name, target, "deny", llm_reason, config)
+                    print(json.dumps({
+                        "hookSpecificOutput": {
+                            "hookEventName": "PreToolUse",
+                            "permissionDecision": "deny",
+                            "permissionDecisionReason": llm_reason,
+                        }
+                    }))
+                elif llm_decision == "ask":
+                    log_decision(tool_name, target, "ask", llm_reason, config)
+                    print(json.dumps({
+                        "hookSpecificOutput": {
+                            "hookEventName": "PreToolUse",
+                            "permissionDecision": "ask",
+                            "permissionDecisionReason": llm_reason,
+                        }
+                    }))
+                else:
+                    # Layer 2 not configured or passed -> create pending marker
+                    log_decision(tool_name, target, "pass", llm_reason, config)
+                    create_pending_marker(tool_name, target, config)
 
         elif hook_type == "PostToolUse":
             # Find and resolve the most recent pending marker for this tool.
