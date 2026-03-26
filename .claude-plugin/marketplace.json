@@ -1,25 +1,31 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "claude-guardrail",
+  "description": "Security hook with rule-based and LLM-powered action classification for Claude Code",
   "owner": {
     "name": "lyuwen",
     "email": ""
   },
   "metadata": {
-    "description": "Security hook with rule-based and LLM-powered action classification for Claude Code",
-    "version": "0.1.0"
+    "description": "Three-layer security model with deny/allow/ask rules, optional LLM classification, and comprehensive skills"
   },
   "plugins": [
     {
       "name": "claude-guardrail",
-      "description": "Three-layer security model with deny/allow/ask rules, optional LLM classification, and comprehensive skills for configuration and troubleshooting",
       "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/understanding-guardrail",
-        "./skills/configuring-rules",
-        "./skills/troubleshooting",
-        "./skills/layer-2-setup"
-      ]
+      "description": "Security hook with rule-based and LLM-powered action classification. Provides three-layer defense: fast regex rules, optional AI detection, and user confirmation for ambiguous actions.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Claude Guardrail Contributors",
+        "email": ""
+      },
+      "homepage": "https://github.com/lyuwen/claude-guardrail",
+      "repository": "https://github.com/lyuwen/claude-guardrail",
+      "license": "MIT",
+      "keywords": ["security", "hooks", "guardrail", "safety", "validation"],
+      "category": "workflow",
+      "tags": ["security", "automation", "hooks"],
+      "strict": false
     }
   ]
 }
