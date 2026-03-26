@@ -9,5 +9,6 @@
   "homepage": "https://github.com/lyuwen/claude-guardrail",
   "repository": "https://github.com/lyuwen/claude-guardrail",
   "license": "MIT",
-  "keywords": ["security", "hook", "llm", "guardrail", "classification"]
+  "keywords": ["security", "hook", "llm", "guardrail", "classification"],
+  "hooks": "./hooks/hooks.json"
 }
