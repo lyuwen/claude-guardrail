@@ -225,13 +225,13 @@ def split_bash_command(command: str) -> List[str]:
     segments.extend(subs)
 
     # Top-level operator splitting on the original command
-    for sep in [';', '&&', '||', '|', '&', '\n']:
+    for sep in [';', '&&', '||', '|', '\n']:
         parts = _top_level_split(command, [sep])
         segments.extend(p for p in parts if p)
 
     # Also do top-level operator splitting on each extracted substitution
     for sub in subs:
-        for sep in [';', '&&', '||', '|', '&', '\n']:
+        for sep in [';', '&&', '||', '|', '\n']:
             parts = _top_level_split(sub, [sep])
             segments.extend(p for p in parts if p)
 
