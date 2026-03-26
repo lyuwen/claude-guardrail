@@ -1,5 +1,10 @@
 {
-  "marketplaces": [
+  "name": "claude-guardrail-marketplace",
+  "owner": {
+    "name": "lyuwen",
+    "url": "https://github.com/lyuwen"
+  },
+  "plugins": [
     {
       "name": "claude-guardrail",
       "url": "https://github.com/lyuwen/claude-guardrail.git"
