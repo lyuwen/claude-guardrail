@@ -3,8 +3,8 @@
   "name": "claude-guardrail",
   "description": "Security hook with rule-based and LLM-powered action classification for Claude Code",
   "owner": {
-    "name": "lyuwen",
-    "email": ""
+    "name": "Lyuwen Fu",
+    "email": "fulvwen@gmail.com"
   },
   "metadata": {
     "description": "Three-layer security model with deny/allow/ask rules, optional LLM classification, and comprehensive skills"
@@ -16,8 +16,8 @@
       "description": "Security hook with rule-based and LLM-powered action classification. Provides three-layer defense: fast regex rules, optional AI detection, and user confirmation for ambiguous actions.",
       "version": "0.1.0",
       "author": {
-        "name": "Claude Guardrail Contributors",
-        "email": ""
+        "name": "Lyuwen Fu",
+        "email": "fulvwen@gmail.com"
       },
       "homepage": "https://github.com/lyuwen/claude-guardrail",
       "repository": "https://github.com/lyuwen/claude-guardrail",
