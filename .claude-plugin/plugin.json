@@ -1,0 +1,13 @@
+{
+  "name": "claude-guardrail",
+  "version": "0.1.0",
+  "description": "Security hook with rule-based and LLM-powered action classification",
+  "author": {
+    "name": "Claude Guardrail Contributors",
+    "email": "contact@example.com"
+  },
+  "homepage": "https://github.com/yourusername/claude-guardrail",
+  "repository": "https://github.com/yourusername/claude-guardrail",
+  "license": "MIT",
+  "keywords": ["security", "hook", "llm", "guardrail", "classification"]
+}

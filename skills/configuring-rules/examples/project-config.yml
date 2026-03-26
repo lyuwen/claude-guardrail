@@ -1,0 +1,25 @@
+# Example project-specific guardrail configuration
+# Location: .claude/guardrail.yml
+
+# Block production operations
+deny_rules:
+  bash:
+    - "kubectl delete namespace prod"
+    - "terraform destroy.*prod"
+    - "ansible-playbook.*production"
+  file_path:
+    - "config/production\\.yml$"
+    - "secrets/prod/"
+
+# Allow project-specific safe scripts
+allow_rules:
+  bash:
+    - "^\\./scripts/test\\.sh"
+    - "^\\./scripts/lint\\.sh"
+    - "^\\./scripts/build\\.sh"
+
+# Prompt for deployment scripts
+ask_rules:
+  bash:
+    - "^\\./scripts/deploy"
+    - "^\\./scripts/migrate"

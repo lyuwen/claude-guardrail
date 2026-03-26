@@ -1,122 +1,257 @@
-# Claude Code Guardrail
+# Claude Guardrail Plugin
 
-A security hook for Claude Code that provides rule-based and LLM-powered classification of tool actions before execution.
+Security hook with rule-based and LLM-powered action classification for Claude Code.
 
-## Features
+## Overview
 
-- **Three-layer security model:**
-  - **Layer 1**: Fast regex-based rules (deny/allow/ask)
-  - **Layer 2**: LLM-based classification for ambiguous actions
-  - **Layer 3**: User confirmation prompts
+Claude Guardrail is a Claude Code plugin that provides a security layer for AI assistant tool execution. It uses a three-layer defense model to prevent accidental destruction, detect prompt injection attacks, and provide context-aware threat detection.
 
-- **Python script safety analysis**: AST-based whitelist/blacklist checking for safe read-only scripts
+**Key Features**:
+- **Layer 1**: Fast rule-based classification (deny/allow/ask)
+- **Layer 2**: Optional LLM-powered detection for novel threats
+- **Layer 3**: User confirmation for ambiguous actions
+- **Auto-install hooks**: Automatic integration with Claude Code
+- **Comprehensive skills**: Built-in documentation and troubleshooting
 
-- **Secret sanitization**: Redacts API keys, tokens, and credentials before LLM evaluation
+## Quick Start
 
-- **Fail-open design**: Never blocks users due to guardrail bugs
-
-## Installation
-
-### Prerequisites
-
-- Python 3.10+
-- PyYAML: `pip install pyyaml`
-- (Optional) Anthropic SDK for Layer 2: `pip install anthropic`
-
-### Install as Claude Code Hook
+### 1. Install Dependencies
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/claude-guardrail.git
-cd claude-guardrail
+# Python 3.10+ required
+python3 --version
 
-# Install for current project
-./guardrail/install.sh
+# Install PyYAML
+pip3 install pyyaml
 
-# Or install globally for all projects
-./guardrail/install.sh --scope user
+# Optional: Install Anthropic SDK for Layer 2
+pip3 install anthropic
+```
+
+### 2. Install Hooks
+
+```bash
+# Run installation script
+bash hooks/scripts/install-hooks.sh
+```
+
+This automatically:
+- Checks dependencies
+- Merges hooks into `.claude/settings.json`
+- Backs up existing settings
+- Configures PreToolUse and PostToolUse hooks
+
+### 3. Test Installation
+
+```bash
+# Run test suite
+bash hooks/scripts/test-guardrail.sh
+```
+
+Expected: All tests pass with correct deny/allow/ask decisions.
+
+### 4. Use with Claude Code
+
+The plugin provides 4 skills that automatically activate when you ask relevant questions:
+
+**Understanding Guardrail**:
+```
+"How does guardrail work?"
+"Explain the security model"
+```
+
+**Configuring Rules**:
+```
+"Add a guardrail rule to block kubectl delete"
+"How do I allow my deployment script?"
+```
+
+**Troubleshooting**:
+```
+"Guardrail not working"
+"Why was this command blocked?"
+```
+
+**Layer 2 Setup**:
+```
+"Configure Layer 2"
+"Set up LLM classification"
+```
+
+## How It Works
+
+### Three-Layer Security Model
+
+**Layer 1: Rule-Based Classification**
+- Fast regex pattern matching (<1ms)
+- Deny rules block known dangerous commands
+- Allow rules auto-approve safe operations
+- Ask rules prompt for potentially risky actions
+
+**Layer 2: LLM Classification (Optional)**
+- AI-powered detection for novel threats
+- Context-aware analysis
+- Sanitizes secrets before sending to API
+- 200-1000ms latency, requires API key
+
+**Layer 3: User Confirmation**
+- Final decision for ambiguous cases
+- Human judgment for context-dependent threats
+- Audit trail in logs
+
+### Decision Flow
+
+```
+Command → Layer 1 Rules → Layer 2 LLM → User Prompt → Execute/Block
+          (deny/allow/ask)   (if pass)     (if ask)
 ```
 
 ## Configuration
 
-### Layer 1: Rule-based Classification
+### Basic Configuration
 
-Create `.claude/guardrail.yml` in your project or `~/.claude/guardrail.yml` for global config:
+Create `.claude/guardrail.yml` for project-specific rules:
 
 ```yaml
 deny_rules:
   bash:
-    - "custom-dangerous-command"
+    - "kubectl delete namespace prod"  # Block prod deletion
   file_path:
-    - "secret-config.yml"
+    - "config/production\\.yml"        # Block prod config edits
 
 allow_rules:
   bash:
-    - "^my-safe-tool\\s"
+    - "^\\./scripts/safe-deploy\\.sh"  # Allow specific script
 
 ask_rules:
   bash:
-    - "^deploy\\s"
+    - "^kubectl apply"                 # Prompt for k8s changes
 ```
 
-### Layer 2: LLM Classification
+### Layer 2 Configuration (Optional)
 
-Configure LLM credentials in `~/.claude/guardrail.yml`:
+Create `.claude/guardrail.local.md` for LLM classification:
 
-```yaml
+```markdown
+---
 llm:
-  provider: anthropic  # or openai
-  api_key: your-api-key
-  model: claude-3-5-haiku-20241022
-  base_url: https://api.anthropic.com  # optional
+  provider: anthropic
+  api_key: ${ANTHROPIC_AUTH_TOKEN}
+  model: claude-3-5-sonnet-20241022
+---
 ```
 
-Or use environment variables:
-
+Set environment variable:
 ```bash
-export ANTHROPIC_AUTH_TOKEN=your-api-key
-export ANTHROPIC_MODEL=claude-3-5-haiku-20241022
-export ANTHROPIC_BASE_URL=https://api.anthropic.com  # optional
+export ANTHROPIC_AUTH_TOKEN=sk-ant-your-key-here
 ```
 
-## Decision Flow
+## Skills
 
-```
-Tool Action
-    ↓
-Deny Rules? → DENY (block immediately)
-    ↓
-Allow Rules? → ALLOW (auto-approve)
-    ↓
-Ask Rules? → ASK (prompt user)
-    ↓
-Layer 2 LLM → allow/deny/ask
-    ↓
-Pass → Claude Code built-in prompting
-```
+The plugin includes 4 comprehensive skills:
+
+### 1. Understanding Guardrail
+- How guardrail works
+- Security model explanation
+- Decision flow and architecture
+
+### 2. Configuring Rules
+- Adding deny/allow/ask rules
+- Regex pattern syntax
+- Configuration file structure
+
+### 3. Troubleshooting
+- Debugging hook issues
+- Reading logs
+- Testing rules manually
+- Common errors and solutions
+
+### 4. Layer 2 Setup
+- Configuring LLM classification
+- API key setup
+- Performance optimization
+- Security considerations
 
 ## Examples
 
+### Block Dangerous Commands
+
+```yaml
+# .claude/guardrail.yml
+deny_rules:
+  bash:
+    - "rm\\s+-rf\\s+/"              # Delete root
+    - ":(\\){.*:\\|:&\\};"          # Fork bomb
+    - "kubectl delete namespace prod"  # Prod deletion
+```
+
+### Allow Safe Scripts
+
+```yaml
+allow_rules:
+  bash:
+    - "^\\./scripts/test\\.sh"      # Test script
+    - "^\\./scripts/lint\\.sh"      # Lint script
+```
+
+### Prompt for Deployments
+
+```yaml
+ask_rules:
+  bash:
+    - "^\\./deploy"                 # Any deploy script
+    - "^git\\s+push\\s+--force"     # Force push
+```
+
+## Testing
+
+See [TESTING.md](TESTING.md) for comprehensive testing guide.
+
+Quick test:
 ```bash
 # Test deny rule
 echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' | python -m guardrail.cli
 
-# Test allow rule
-echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"git status"}}' | python -m guardrail.cli
-
-# Test Layer 2 (requires LLM configured)
-echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"docker run ubuntu"}}' | python -m guardrail.cli
+# Expected: {"permissionDecision": "deny"}
 ```
 
-## Development
+## Logs
+
+View decisions in `.claude/guardrail.log`:
 
 ```bash
-# Run tests
-python -m pytest tests/ -v
-
-# Verify config loads
-python -m guardrail.cli --check
+tail -n 20 .claude/guardrail.log
 ```
+
+Log format:
+```
+[2026-03-26 10:30:45] PreToolUse:Bash | git status | allow | matched allow rule
+[2026-03-26 10:31:12] PreToolUse:Bash | rm -rf / | deny | matched deny rule
+```
+
+## Troubleshooting
+
+### Hooks Not Firing
+
+```bash
+# Check hook registration
+grep -A 5 "PreToolUse" .claude/settings.json | grep guardrail
+
+# Reinstall if missing
+bash hooks/scripts/install-hooks.sh
+```
+
+### Wrong Decisions
+
+```bash
+# Test command manually
+echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"YOUR_COMMAND"}}' | python -m guardrail.cli
+
+# Check logs
+grep "YOUR_COMMAND" .claude/guardrail.log
+```
+
+For more troubleshooting, ask Claude: "Guardrail not working" to load the troubleshooting skill.
 
 ## License
 

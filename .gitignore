@@ -40,6 +40,9 @@ ENV/
 # Claude Code
 .claude/guardrail.log
 .claude/guardrail_pending/
+.claude/guardrail.yml
+.claude/*.local.md
+.claude/settings.json
 .claude/settings.json.bak.*
 
 # OS

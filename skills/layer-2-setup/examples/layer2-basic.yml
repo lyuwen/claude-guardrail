@@ -1,0 +1,21 @@
+# Basic Layer 2 Configuration
+
+# Minimal setup for Layer 2 LLM classification
+# Place this file at: .claude/guardrail.local.md
+
+---
+llm:
+  provider: anthropic
+  api_key: ${ANTHROPIC_AUTH_TOKEN}
+  model: claude-3-5-sonnet-20241022
+---
+
+# Setup Instructions
+
+1. Get API key from https://console.anthropic.com
+2. Set environment variable:
+   export ANTHROPIC_AUTH_TOKEN=sk-ant-your-key-here
+3. Add to shell profile for persistence:
+   echo 'export ANTHROPIC_AUTH_TOKEN=sk-ant-your-key-here' >> ~/.bashrc
+4. Test Layer 2:
+   echo '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"docker run ubuntu"}}' | python -m guardrail.cli

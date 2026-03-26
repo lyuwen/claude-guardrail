@@ -1,0 +1,19 @@
+# Example user-wide guardrail configuration
+# Location: ~/.claude/guardrail.yml
+
+# Additional deny rules for personal safety
+deny_rules:
+  bash:
+    - "^sudo rm"
+    - "chmod 777"
+  file_path:
+    - "^/Users/username/Documents/important/"
+
+# Layer 2 LLM configuration
+llm:
+  provider: anthropic
+  api_key: sk-ant-your-key-here
+  model: claude-3-5-haiku-20241022
+
+# Custom log location
+log_file: ~/.claude/guardrail.log

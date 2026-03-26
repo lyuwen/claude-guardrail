@@ -1,0 +1,8 @@
+{
+  "marketplaces": [
+    {
+      "name": "claude-guardrail",
+      "url": "https://github.com/lyuwen/claude-guardrail.git"
+    }
+  ]
+}
