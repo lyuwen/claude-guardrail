@@ -162,14 +162,6 @@ def evaluate_action(
         for segment in segments:
             if _check_allow(segment, allow_patterns):
                 return {"decision": "allow", "reason": "bash command matched allow rule"}
-
-        # Special case: python/python3 script execution
-        # Check if it's a safe read-only script
-        python_match = re.match(r'^(python[0-9.]*)\s+(.+)$', target.strip())
-        if python_match:
-            script_path = python_match.group(2).split()[0]
-            if is_safe_python_script(script_path):
-                return {"decision": "allow", "reason": "safe read-only python script"}
     else:
         if _check_allow(target, allow_patterns):
             return {
@@ -178,7 +170,18 @@ def evaluate_action(
             }
 
     # ------------------------------------------------------------------
-    # Step 6: Check ask rules
+    # Step 6: Language safety check (before ask rules)
+    # ------------------------------------------------------------------
+    if rule_category == "bash":
+        # Python script execution: check if it's safe read-only
+        python_match = re.match(r'^(python[0-9.]*)\s+(.+)$', target.strip())
+        if python_match:
+            script_path = python_match.group(2).split()[0]
+            if is_safe_python_script(script_path):
+                return {"decision": "allow", "reason": "safe read-only python script"}
+
+    # ------------------------------------------------------------------
+    # Step 7: Check ask rules
     # ------------------------------------------------------------------
     if rule_category == "bash":
         segments = split_bash_command(target)
@@ -193,6 +196,6 @@ def evaluate_action(
             }
 
     # ------------------------------------------------------------------
-    # Step 7: No match --> pass (defer to Layer 2)
+    # Step 8: No match --> pass (defer to Layer 2)
     # ------------------------------------------------------------------
     return {"decision": "pass", "reason": "no matching rule, deferred to Layer 2"}
