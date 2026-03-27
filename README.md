@@ -28,18 +28,28 @@ pip3 install pyyaml
 pip3 install anthropic
 ```
 
-### 2. Install Hooks
+### 2. Install Plugin
+
+**Recommended: Install from marketplace**
 
 ```bash
-# Run installation script
-bash hooks/scripts/install-hooks.sh
+# Add marketplace
+/plugin marketplace add lyuwen/claude-guardrail
+
+# Install plugin
+/plugin install claude-guardrail@claude-guardrail
 ```
 
-This automatically:
-- Checks dependencies
-- Merges hooks into `.claude/settings.json`
-- Backs up existing settings
-- Configures PreToolUse and PostToolUse hooks
+**Alternative: Install from GitHub**
+
+```bash
+cc plugin add https://github.com/lyuwen/claude-guardrail.git
+```
+
+The plugin will automatically:
+- Register PreToolUse and PostToolUse hooks
+- Make 4 skills available for help and configuration
+- Start intercepting tool use for security checks
 
 ### 3. Test Installation
 
