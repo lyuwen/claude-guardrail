@@ -1,18 +1,28 @@
 {
-  "PreToolUse": [{
-    "matcher": "Bash|Write|Edit|WebFetch",
-    "hooks": [{
-      "type": "command",
-      "command": "python -m guardrail.cli",
-      "timeout": 10000
-    }]
-  }],
-  "PostToolUse": [{
-    "matcher": "Bash|Write|Edit|WebFetch",
-    "hooks": [{
-      "type": "command",
-      "command": "python -m guardrail.cli",
-      "timeout": 10000
-    }]
-  }]
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHONPATH=${CLAUDE_PLUGIN_ROOT}:$PYTHONPATH python3 -m guardrail.cli",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHONPATH=${CLAUDE_PLUGIN_ROOT}:$PYTHONPATH python3 -m guardrail.cli",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  }
 }
